@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, func
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from datetime import datetime
 from flask_cors import CORS
 import pandas as pd
