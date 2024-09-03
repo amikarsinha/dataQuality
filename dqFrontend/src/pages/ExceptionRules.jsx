@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import DqNavbar from "../components/DqNavbar";
 import axios from "axios";
 import { FaCheckSquare, FaPlus, FaSync, FaRedo, FaTrash } from "react-icons/fa";
-
+import Swal from 'sweetalert2';
 export default function ExceptionRules() {
-  
+
   const [data, setData] = useState([]);
   const [selectedRows, setSelectedRows] = useState([]); // Track selected rows
   const [loading, setLoading] = useState(true);
@@ -74,7 +74,7 @@ export default function ExceptionRules() {
         setSelectedRows([rowData]);
       }
     }
-    
+
     setFormValues({
       exception_id: rowData.exception_id || "",
       exception_name: rowData.exception_name || "",
@@ -93,6 +93,14 @@ export default function ExceptionRules() {
     });
   };
 
+  function showAlert(message) {
+    Swal.fire({
+      title: 'Custom Alert!',
+      text: message,
+      icon: 'info',
+      confirmButtonText: 'OK'
+    });
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -103,7 +111,7 @@ export default function ExceptionRules() {
   };
   const formatDate = (date) => {
     const d = new Date(date);
-  
+
     // Get components of the date
     const day = d.toLocaleString('en-US', { weekday: 'short' }); // e.g., "Sat"
     const dateNum = d.toLocaleString('en-US', { day: '2-digit' }); // e.g., "10"
@@ -112,14 +120,14 @@ export default function ExceptionRules() {
     const hours = d.toLocaleString('en-US', { hour: '2-digit', hour12: false }); // e.g., "00"
     const minutes = d.toLocaleString('en-US', { minute: '2-digit' }); // e.g., "00"
     const seconds = d.toLocaleString('en-US', { second: '2-digit' }); // e.g., "00"
-  
+
     // Format date string as required
     const formattedDate = `${day}, ${dateNum} ${month} ${year} ${hours}:${minutes}:${seconds} GMT`;
-  
+
     return formattedDate;
   };
-  
-  
+
+
   const handleAddRule = async () => {
     // Prepare the data to send with correct types
     const dataToSend = {
@@ -130,35 +138,48 @@ export default function ExceptionRules() {
       logic: formValues.logic, // Keep as text (string)
       isactive: parseInt(formValues.isactive, 10) // Convert to integer
     };
-  
+
     console.log('Data being sent:', dataToSend); // Log the data to verify
-  
+
     try {
       const response = await axios.post('http://localhost:5000/api/rules', dataToSend);
       console.log('Rule added:', response.data);
+      showAlert(response.data.message)
     } catch (error) {
       console.error('Error adding rule:', error);
     }
   };
 
   const handleUpdateRule = async () => {
+    let status = formValues.isactive;
+    let isActive;
 
+    const trueValues = ["True", "true", "Yes", "yes"];
+
+    isActive = trueValues.includes(status) ? 1 : 0;
     const dataToSend = {
       ...formValues,
       exception_id: parseInt(formValues.exception_id, 10), // Convert to integer
       created_date: formatDate(formValues.created_date), // Convert to required date format
       table_id: parseInt(formValues.table_id, 10), // Convert to integer
       logic: formValues.logic, // Keep as text (string)
-      isactive: parseInt(formValues.isactive, 10) // Convert to integer
+      isactive: isActive // Convert to integer
     };
-  
+
     console.log('Data being sent:', dataToSend); // Log the data to verify
-   
+
     try {
-      
+
       const response = await axios.put(`http://localhost:5000/api/rules/${formValues.exception_id}`, dataToSend);
       console.log('Rule updated:', response.data);
-      
+      // alert(response.data.message);
+      // Swal.fire({
+      //   title: 'Custom Alert!',
+      //   text: response.data.message,
+      //   icon: 'info',
+      //   confirmButtonText: 'OK'
+      // });
+      showAlert(response.data.message)
     } catch (error) {
       console.error('Error updating rule:', error);
     }
@@ -168,6 +189,7 @@ export default function ExceptionRules() {
     try {
       const response = await axios.delete(`http://localhost:5000/api/rules/${formValues.exception_id}`);
       console.log('Rule deleted:', response.data);
+      showAlert(response.data.message)
     } catch (error) {
       console.error('Error deleting rule:', error);
     }
@@ -249,7 +271,7 @@ export default function ExceptionRules() {
                   {item.created_date}
                 </td>
                 <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                 {item.isactive == 1 ? "true" : "false"}
+                  {item.isactive == 1 ? "true" : "false"}
                 </td>
                 <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                   {item.table_id}
