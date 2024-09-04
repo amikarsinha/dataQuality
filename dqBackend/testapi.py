@@ -52,7 +52,7 @@ class ExceptionResult(Base):
 
 # Create the session
 Session = scoped_session(sessionmaker(bind=engine))
-session = Session()
+# session = Session()
 
 # Custom error handler to ensure JSON response
 @app.errorhandler(Exception)
@@ -65,6 +65,7 @@ def handle_exception(e):
 # Endpoint to add a new rule
 @app.route('/api/rules', methods=['POST'])
 def add_rule():
+    session = Session()
     try:
         # Get data from the request body
         data = request.get_json()
@@ -95,10 +96,13 @@ def add_rule():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 
 @app.route('/api/rules/<int:exception_id>', methods=['PUT'])
 def update_rule(exception_id):
+    session = Session()
     try:
         data = request.get_json()
         rule = session.query(ExceptionRule).filter_by(exception_id=exception_id).first()
@@ -127,10 +131,13 @@ def update_rule(exception_id):
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 # Endpoint to delete a rule
 @app.route('/api/rules/<int:exception_id>', methods=['DELETE'])
 def delete_rule(exception_id):
+    session = Session()
     try:
         rule = session.query(ExceptionRule).filter_by(exception_id=exception_id).first()
 
@@ -145,10 +152,13 @@ def delete_rule(exception_id):
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 # Endpoint to retrieve all rules
 @app.route('/api/rules', methods=['GET'])
 def get_all_rules():
+    session = Session()
     try:
         rules = session.query(ExceptionRule).all()
         return jsonify([{
@@ -170,6 +180,8 @@ def get_all_rules():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 
 @app.route('/api/dataProfiling', methods=['GET'])
@@ -204,6 +216,7 @@ def data_profiling():
 # get all exception records
 @app.route('/api/executeRules', methods=['GET'])
 def get_all_rules_ExecuteRules():
+    session = Session()
     try:
         rules = session.query(ExceptionRule).all()
         return jsonify([{
@@ -225,6 +238,8 @@ def get_all_rules_ExecuteRules():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 # Custom error handler to ensure JSON response
 @app.errorhandler(Exception)
@@ -237,6 +252,7 @@ def handle_exception(e):
 # Endpoint to execute the rules and store the results
 @app.route('/api/execute_rule', methods=['POST'])
 def execute_rule():
+    session = Session()
     try:
         data = request.get_json()
         # print(data)
@@ -289,11 +305,14 @@ def execute_rule():
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
+    finally:
+        Session.remove()
 
 
 # Get all results for exception records
 @app.route('/api/exception_results', methods=['GET'])
 def get_all_exception_results():
+    session = Session()
     try:
         # Query all records from the exception_result table
         results = session.query(ExceptionResult).all()
@@ -312,7 +331,8 @@ def get_all_exception_results():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
+    finally:
+        Session.remove()
 
 
 @app.route('/api/records-vs-id', methods=['GET'])
@@ -456,21 +476,25 @@ def create_records_vs_state_Graph():
 
 
 
-@app.route('/api/line-chart-data', methods=['GET'])
-def get_line_chart_data():
-    # Query to count active programs by month and year
-    query = session.query(
-        func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
-        func.count().label('active_count')
-    ).filter(ExceptionResult.isactive == 0
-    ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-    ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-    ).all()
-    print(query)
-    # Convert query result to a list of dictionaries
-    result = [{'date': month, 'active_count': active_count} for month, active_count in query]
+# @app.route('/api/line-chart-data', methods=['GET'])
+# def get_line_chart_data():
+#     # Query to count active programs by month and year
+#     session = Session()
+#     query = session.query(
+#         func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
+#         func.count().label('active_count')
+#     ).filter(ExceptionResult.isactive == 0
+#     ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+#     ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+#     ).all()
+#     print(query)
+#     # Convert query result to a list of dictionaries
+#     result = [{'date': month, 'active_count': active_count} for month, active_count in query]
 
-    return jsonify(result)
+#     return jsonify(result)
+
+
+
 if __name__ == '__main__':
     # Create the database and tables if they don't exist
     Base.metadata.create_all(engine)

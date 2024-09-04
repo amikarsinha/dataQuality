@@ -480,7 +480,7 @@ export default function ExceptionRules() {
             onClick={handleGetAllRules}
             className="w-[22%] bg-blue-700 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center"
           >
-            <FaRedo className="mr-2" /> Update Exception Records
+            <FaRedo className="mr-2" /> Update Exception Rules
           </button>
         </div>
       </form>
