@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import {
   FaChartBar,
   FaCalculator,
@@ -86,6 +87,16 @@ export default function ExecuteRules() {
     });
   };
 
+
+  function showAlert(message) {
+    Swal.fire({
+      title: 'Custom Alert!',
+      text: message,
+      icon: 'info',
+      confirmButtonText: 'OK'
+    });
+  }
+
   const handleRun = () => {
     // Log the data that will be sent
     console.log('Data being sent:', selectedRows);
@@ -94,10 +105,13 @@ export default function ExecuteRules() {
     axios.post('http://localhost:5000/api/execute_rule', selectedRows)
       .then(response => {
         console.log('Success:', response.data);
+        showAlert(response.data.message)
       })
       .catch(error => {
         console.error('Error:', error);
       });
+
+  
   };
 
 
@@ -189,8 +203,8 @@ export default function ExecuteRules() {
             </table>
           </div>
 
-          <div className="button-class mt-10 mx-6 p-6 border border-black shadow-lg rounded-lg">
-            <label htmlFor="indices" className="block mb-1">
+          {/* <div className="button-class mt-10 mx-6 p-6 border border-black shadow-lg rounded-lg"> */}
+            {/* <label htmlFor="indices" className="block mb-1">
               Enter indices (Comma-Separated)
             </label>
             <input
@@ -198,14 +212,14 @@ export default function ExecuteRules() {
               id="indicesBox"
               name="IndicesBox"
               className="w-full px-2 py-1 border border-black rounded mb-2"
-            />
+            /> */}
             <div className="flex justify-center space-x-2 mt-4">
-              <button
+              {/* <button
                 type="button"
                 className="button bg-blue-500 text-white py-2 px-4 rounded flex items-center hover:bg-blue-600"
               >
                 <FaCheckSquare className="mr-2" /> Select checkboxes
-              </button>
+              </button> */}
               <button
                 type="button"
                 onClick={handleRun}
@@ -213,20 +227,20 @@ export default function ExecuteRules() {
               >
                 <FaPlay className="mr-2" /> Run
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="button bg-blue-500 text-white py-2 px-4 rounded flex items-center hover:bg-blue-600"
               >
                 <FaSync className="mr-2" /> Refresh
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 type="button"
                 className="button bg-blue-500 text-white py-2 px-4 rounded flex items-center hover:bg-blue-600"
               >
                 <FaClipboardCheck className="mr-2" /> Select All
-              </button>
+              </button> */}
             </div>
-          </div>
+          {/* </div> */}
         </div>
       </div>
     </div>

@@ -204,7 +204,7 @@ const Charts = () => {
   {/* First Row */}
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Bar Chart
+      <FaChartBar className="mr-2" /> Exceptions by ID Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
       <canvas ref={barRef} />
@@ -212,7 +212,7 @@ const Charts = () => {
   </div>
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Horizontal Bar Chart
+      <FaChartBar className="mr-2" /> Severity Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
       <canvas ref={horizontalBarRef} />
@@ -223,7 +223,7 @@ const Charts = () => {
   
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartPie className="mr-2" /> Pie Chart
+      <FaChartPie className="mr-2" /> Department Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
       <canvas ref={pieRef} />
@@ -232,7 +232,7 @@ const Charts = () => {
 
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartLine className="mr-2" /> Status Bar Chart
+      <FaChartLine className="mr-2" /> Status Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
       <canvas ref={barRefStatus} />
