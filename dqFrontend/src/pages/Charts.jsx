@@ -8,6 +8,7 @@ import fetchHorizontalBarChartData from "../data/horizontalBarChartData";
 import lineChartData from "../data/lineChartData";
 import fetchPieChartData from "../data/pieChartData";
 import DqNavbar from '../components/DqNavbar';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 Chart.register(...registerables);
 
 const Charts = () => {

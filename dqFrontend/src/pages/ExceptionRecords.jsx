@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import DqNavbar from "../components/DqNavbar";
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   FaFilter,
   FaChartBar,
@@ -14,7 +15,7 @@ import {
 const ExceptionRecords = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [activeLink, setActiveLink] = useState('/Charts');
   const fetchRules = async () => {
     setLoading(true);
     try {
@@ -90,30 +91,30 @@ const ExceptionRecords = () => {
               </tr>
             </thead>
             <tbody>
-                {data.map((item, index) => (
-                  <tr key={index}>
-                    
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.id}
-                    </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.exception_id}
-                    </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.primary_key}
-                    </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.logic}
-                    </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.created_date}
-                    </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
-                      {item.created_time}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              {data.map((item, index) => (
+                <tr key={index}>
+
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.id}
+                  </td>
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.exception_id}
+                  </td>
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.primary_key}
+                  </td>
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.logic}
+                  </td>
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.created_date}
+                  </td>
+                  <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {item.created_time}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         <div className="mt-5 p-5 mx-auto text-center">
@@ -125,12 +126,19 @@ const ExceptionRecords = () => {
           ></textarea>
         </div>
         <div className="mx-auto flex space-x-5 my-5 justify-center">
-          <button
-            type="submit"
-            className="text-white bg-blue-600 hover:bg-blue-500 rounded-md w-48 flex items-center justify-center py-2 px-4"
-          >
-            <FaChartBar className="mr-2" /> Create Charts
-          </button>
+
+          <Link to='/Charts'>
+            <button
+              type="submit"
+              onClick={() => setActiveLink('/Charts')}
+              className="text-white bg-blue-600 hover:bg-blue-500 rounded-md w-48 flex items-center justify-center py-2 px-4"
+            >
+              <FaChartBar className="mr-2" /> Create Charts
+            </button>
+          </Link>
+
+
+
           <button
             type="submit"
             className="text-white bg-blue-600 hover:bg-blue-500 rounded-md w-48 flex items-center justify-center py-2 px-4"
