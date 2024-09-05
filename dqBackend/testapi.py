@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-DATABASE_URI = 'mysql+pymysql://root:Shyam$2002@localhost:3306/exception_database'
+DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/exception_database'
 engine = create_engine(DATABASE_URI)
 Base = declarative_base()
 
