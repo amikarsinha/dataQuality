@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Database configuration
-DATABASE_URI = 'mysql+pymysql://root:admin@localhost:3306/exception_database'
+DATABASE_URI = 'mysql+pymysql://root:Shyam$2002@localhost:3306/exception_database'
 engine = create_engine(DATABASE_URI)
 Base = declarative_base()
 
@@ -121,6 +121,7 @@ def update_rule(exception_id):
         rule.exception_owner = data.get('exception_owner', rule.exception_owner)
         rule.isactive = bool(data.get('isactive', rule.isactive))
         rule.logic = data.get('logic', rule.logic)
+        rule.table_id = data.get('table_id', rule.table_id)
         rule.pipeline_stage = data.get('pipeline_stage', rule.pipeline_stage)
         rule.source_system_type = data.get('source_system_type', rule.source_system_type)
 
