@@ -147,6 +147,7 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error adding rule:', error);
+      showAlert(error)
     }
   };
 
@@ -182,6 +183,7 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error updating rule:', error);
+      showAlert(error)
     }
   };
 
@@ -192,6 +194,7 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error deleting rule:', error);
+      showAlert(error)
     }
   };
 

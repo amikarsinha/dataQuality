@@ -109,6 +109,7 @@ export default function ExecuteRules() {
       })
       .catch(error => {
         console.error('Error:', error);
+        showAlert(error)
       });
 
   
