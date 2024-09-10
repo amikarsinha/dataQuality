@@ -10,6 +10,7 @@ import ExceptionRules from './pages/ExceptionRules';
 import ExecuteRules from './pages/ExecuteRules';
 import ExceptionRecords from './pages/ExceptionRecords';
 import Charts from './pages/Charts';
+import Welcome from './components/Welcome';
 
 
 
@@ -19,6 +20,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* path is the url end point and element is the component that is rendered */}
+        <Route exact path='/' element={<Welcome/>} />
         <Route exact path='/login' element={<Login />} />
         <Route exact path='/signup' element={<Signup />} />   
         <Route exact path='/dqHome' element={<DqHome />} />
