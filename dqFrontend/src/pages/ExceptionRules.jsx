@@ -147,7 +147,6 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error adding rule:', error);
-      showAlert(error)
     }
   };
 
@@ -183,7 +182,6 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error updating rule:', error);
-      showAlert(error)
     }
   };
 
@@ -194,7 +192,6 @@ export default function ExceptionRules() {
       showAlert(response.data.message)
     } catch (error) {
       console.error('Error deleting rule:', error);
-      showAlert(error)
     }
   };
 
@@ -213,25 +210,25 @@ export default function ExceptionRules() {
   return (
     <div className="bg-white text-black min-h-screen">
       <DqNavbar />
-      <div className="mx-6 mt-[150px] max-h-[265px] overflow-y-auto rounded-lg shadow-lg p-4 text-center overflow-x-auto whitespace-nowrap">
-        <table className="w-full border-collapse border border-black">
-          <thead className="top-0 bg-white">
+      <div className="mx-6 mt-[150px] max-h-[265px] overflow-y-auto rounded-lg shadow-lg text-center overflow-x-auto whitespace-nowrap">
+        <table className="w-full border-collapse border border-gray">
+          <thead className="bg-blue-600 text-white sticky top-0 z-20 ">
             <tr>
-              <th className="border border-black p-2 min-w-[50px]"></th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Exception ID</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Exception Name</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Logic System</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Owner</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Department</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Company</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Pipeline Stage</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Source System Type</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Severity</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Created Date</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Active</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Table ID</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Logic</th>
-              <th className="border border-black p-2 min-w-[200px] whitespace-normal whitespace-normal">Unique Key</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[50px]"></th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Exception ID</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Exception Name</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Logic System</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Owner</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Department</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Company</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Pipeline Stage</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Source System Type</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Severity</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Created Date</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Active</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Table ID</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Logic</th>
+              <th className="border border-gray hover:bg-blue-500 p-2 min-w-[200px] whitespace-normal whitespace-normal">Unique Key</th>
             </tr>
           </thead>
           <tbody>
