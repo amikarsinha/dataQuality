@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, func
-from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, scoped_session
 from datetime import datetime
 from flask_cors import CORS
 import pandas as pd
@@ -15,7 +16,7 @@ Base = declarative_base()
 
 # Define a model for the table
 class ExceptionRule(Base):
-    __tablename__ = 'realpolicyclaimser'
+    __tablename__ = '250k_new_dataseter'
     
     exception_id = Column(Integer, primary_key=True)
     table_id = Column(Integer, nullable=False)
@@ -52,7 +53,7 @@ class ExceptionResult(Base):
 
 # Create the session
 Session = scoped_session(sessionmaker(bind=engine))
-# session = Session()
+session = Session()
 
 # Custom error handler to ensure JSON response
 @app.errorhandler(Exception)
@@ -65,7 +66,6 @@ def handle_exception(e):
 # Endpoint to add a new rule
 @app.route('/api/rules', methods=['POST'])
 def add_rule():
-    session = Session()
     try:
         # Get data from the request body
         data = request.get_json()
@@ -96,13 +96,10 @@ def add_rule():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 
 @app.route('/api/rules/<int:exception_id>', methods=['PUT'])
 def update_rule(exception_id):
-    session = Session()
     try:
         data = request.get_json()
         rule = session.query(ExceptionRule).filter_by(exception_id=exception_id).first()
@@ -121,7 +118,6 @@ def update_rule(exception_id):
         rule.exception_owner = data.get('exception_owner', rule.exception_owner)
         rule.isactive = bool(data.get('isactive', rule.isactive))
         rule.logic = data.get('logic', rule.logic)
-        rule.table_id = data.get('table_id', rule.table_id)
         rule.pipeline_stage = data.get('pipeline_stage', rule.pipeline_stage)
         rule.source_system_type = data.get('source_system_type', rule.source_system_type)
 
@@ -132,13 +128,10 @@ def update_rule(exception_id):
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 # Endpoint to delete a rule
 @app.route('/api/rules/<int:exception_id>', methods=['DELETE'])
 def delete_rule(exception_id):
-    session = Session()
     try:
         rule = session.query(ExceptionRule).filter_by(exception_id=exception_id).first()
 
@@ -153,13 +146,10 @@ def delete_rule(exception_id):
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 # Endpoint to retrieve all rules
 @app.route('/api/rules', methods=['GET'])
 def get_all_rules():
-    session = Session()
     try:
         rules = session.query(ExceptionRule).all()
         return jsonify([{
@@ -181,15 +171,16 @@ def get_all_rules():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 
 @app.route('/api/dataProfiling', methods=['GET'])
 def data_profiling():
     try:
-        table_name = 'realpolicyclaims'
-        
+        # table_name = '250k_new_dataset'
+        table_name = request.args.get('table_name')
+        # print(data)
+        # print(data.table_name)
+        # print("Hello")
         # Load the data into a DataFrame
         df = pd.read_sql_table(table_name, engine)
         
@@ -217,7 +208,6 @@ def data_profiling():
 # get all exception records
 @app.route('/api/executeRules', methods=['GET'])
 def get_all_rules_ExecuteRules():
-    session = Session()
     try:
         rules = session.query(ExceptionRule).all()
         return jsonify([{
@@ -239,8 +229,6 @@ def get_all_rules_ExecuteRules():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 # Custom error handler to ensure JSON response
 @app.errorhandler(Exception)
@@ -253,7 +241,6 @@ def handle_exception(e):
 # Endpoint to execute the rules and store the results
 @app.route('/api/execute_rule', methods=['POST'])
 def execute_rule():
-    session = Session()
     try:
         data = request.get_json()
         # print(data)
@@ -273,11 +260,11 @@ def execute_rule():
                 return jsonify({"error": "Both 'exception_id' and 'logic' are required in each item"}), 400
 
             # Execute the SQL command
-            result_df = pd.read_sql_query(f'SELECT * FROM realpolicyclaims WHERE {logic}', engine)
-
+            result_df = pd.read_sql_query(f'SELECT * FROM 250k_new_dataset WHERE {logic}', engine)
+            # print(result_df)
             # Iterate through the result dataframe and store each result
             for _, row in result_df.iterrows():
-                primary_key = str(row['POLICY_NO'])  # Assuming 'id' is the primary key of the `realpolicyclaims` table
+                primary_key = str(row['PolicyId'])  # Assuming 'id' is the primary key of the `250k_new_dataset` table
                 created_date = str(datetime.now().date())
                 created_time = str(datetime.now().time())
                 print(len(created_time))
@@ -306,34 +293,30 @@ def execute_rule():
     except Exception as e:
         session.rollback()
         return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
 
 
 # Get all results for exception records
-@app.route('/api/exception_results', methods=['GET'])
-def get_all_exception_results():
-    session = Session()
-    try:
-        # Query all records from the exception_result table
-        results = session.query(ExceptionResult).all()
+# @app.route('/api/exception_results', methods=['GET'])
+# def get_all_exception_results():
+#     try:
+#         # Query all records from the exception_result table
+#         results = session.query(ExceptionResult).all()
 
-        # Serialize the query results into a list of dictionaries
-        result_list = [{
-            "id": result.id,
-            "primary_key": result.primary_key,
-            "created_date": result.created_date,
-            "created_time": result.created_time,
-            "exception_id": result.exception_id,
-            "logic": result.logic
-        } for result in results]
+#         # Serialize the query results into a list of dictionaries
+#         result_list = [{
+#             "id": result.id,
+#             "primary_key": result.primary_key,
+#             "created_date": result.created_date,
+#             "created_time": result.created_time,
+#             "exception_id": result.exception_id,
+#             "logic": result.logic
+#         } for result in results]
 
-        return jsonify(result_list), 200
+#         return jsonify(result_list), 200
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-    finally:
-        Session.remove()
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 400
+    
 
 
 @app.route('/api/records-vs-id', methods=['GET'])
@@ -477,24 +460,109 @@ def create_records_vs_state_Graph():
 
 
 
-# @app.route('/api/line-chart-data', methods=['GET'])
-# def get_line_chart_data():
-#     # Query to count active programs by month and year
-#     session = Session()
-#     query = session.query(
-#         func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
-#         func.count().label('active_count')
-#     ).filter(ExceptionResult.isactive == 0
-#     ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-#     ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-#     ).all()
-#     print(query)
-#     # Convert query result to a list of dictionaries
-#     result = [{'date': month, 'active_count': active_count} for month, active_count in query]
+@app.route('/api/line-chart-data', methods=['GET'])
+def get_line_chart_data():
+    # Query to count active programs by month and year
+    query = session.query(
+        func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
+        func.count().label('active_count')
+    ).filter(ExceptionResult.isactive == 0
+    ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+    ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+    ).all()
+    print(query)
+    # Convert query result to a list of dictionaries
+    result = [{'date': month, 'active_count': active_count} for month, active_count in query]
 
-#     return jsonify(result)
+    return jsonify(result)
 
+# # Get only Filtered Records
+# @app.route('/api/exception_results/<int:exception_id>',methods=['GET'])
+# def get_filtered_exceptions():
+#     try:
+#         data = request.get_json()
+#         exception_id = data.get('exception_id')
+#         result = pd.read_sql_query(f'SELECT * FROM 250k_new_dataseter WHERE exception_id = {exception_id}',engine)
+#         print(result_df)
+#         result_list = [{
+#             "id": result.id,
+#             "primary_key": result.primary_key,
+#             "created_date": result.created_date,
+#             "created_time": result.created_time,
+#             "exception_id": result.exception_id,
+#             "logic": result.logic
+#         } for result in results]
+ 
+#         return jsonify(result_list), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 400
 
+@app.route('/api/exception_results', methods=['GET'])
+@app.route('/api/exception_results/<int:exception_id>', methods=['GET'])
+def get_exception_results(exception_id=None):
+    session = Session()
+    try:
+        if exception_id:
+            # Fetch filtered results by exception_id
+            print(f"Fetching records for exception_id: {exception_id}")
+            results = session.query(ExceptionResult).filter_by(exception_id=exception_id).all()
+        else:
+            # Fetch all records
+            print("Fetching all exception records")
+            results = session.query(ExceptionResult).all()
+ 
+        if not results:
+            return jsonify({"message": "No records found"}), 404
+ 
+        # Serialize the query results into a list of dictionaries
+        result_list = [{
+            "id": result.id,
+            "primary_key": result.primary_key,
+            "created_date": result.created_date,
+            "created_time": result.created_time,
+            "exception_id": result.exception_id,
+            "logic": result.logic
+        } for result in results]
+ 
+        return jsonify(result_list), 200
+ 
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        session.close()
+
+@app.route('/api/exception_stats', methods=['GET'])
+def get_exception_stats():
+    session = Session()
+    try:
+        # 1. Get the total number of records in the table
+        total_records = session.query(func.count(ExceptionResult.id)).scalar()
+ 
+        # 2. Get the total number of records grouped by exception_id
+        records_by_exception_id = session.query(
+            ExceptionResult.exception_id,
+            func.count(ExceptionResult.id).label('count')
+        ).group_by(ExceptionResult.exception_id).all()
+ 
+        # Format the response
+        exception_count_list = [{
+            "exception_id": result[0],
+            "count": result[1]
+        } for result in records_by_exception_id]
+ 
+        response = {
+            "total_records": total_records,
+            "records_by_exception_id": exception_count_list
+        }
+ 
+        return jsonify(response), 200
+ 
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        session.close()
 
 if __name__ == '__main__':
     # Create the database and tables if they don't exist
