@@ -4,61 +4,72 @@ import DqNavbar from "../components/DqNavbar";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaFilter, FaChartBar, FaCalculator, FaIdBadge } from "react-icons/fa";
 // import exceptionResults from "../data/exceptionResults";
+
 const ExceptionRecords = () => {
   const [data, setData] = useState([]);
+  const [summaryData, setSummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeLink, setActiveLink] = useState("/Charts");
-  const [exceptionId, setExceptionId] = useState("");
-
-  // Fetches the default data from the API when the component loads
-  const fetchRules = async () => {
+  const [activeLink, setActiveLink] = useState('/Charts');
+  const [exceptionId, setExceptionId] = useState(''); // Input for exception ID
+  const [error, setError] = useState('');
+ 
+ 
+  // Function to fetch data
+  const fetchRules = async (id = null) => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/exception_results"
-      );
-      setData(response.data);
-      // setData(exceptionResults);
+      const response = id
+        ? await axios.get(`http://localhost:5000/api/exception_results/${id}`)
+        : await axios.get('http://localhost:5000/api/exception_results'); // Adjust the API for default fetch
+ 
+      setData(response.data); // Update data state
     } catch (error) {
-      console.error("Error fetching rules:", error);
+      console.error('Error fetching rules:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  // // Function to filter records by exception_id
-  // function filterRecordsById(exceptionId) {
-  //   return exceptionResults.filter(
-  //     (record) => record.exception_id === parseInt(exceptionId)
-  //   );
-  // }
-  // Fetch filtered data based on the exception ID entered by the user
-  const fetchExceptionResults = async (id) => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`http://localhost:5000/api/exception_results/${id}`);
-      setData(response.data);  // Update the table with the filtered data
-      // const filteredRecords = filterRecordsById(id);
-      // setData(filteredRecords);
-    } catch (error) {
-      console.error("Error fetching filtered rules:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle the filter button click
-  const handleFilterClick = () => {
-    if (exceptionId) {
-      fetchExceptionResults(exceptionId); // Fetch filtered data
-    } else {
-      fetchRules(); // Reload the default data if no ID is provided
-    }
-  };
-
+ 
+  // Trigger API call on page load
   useEffect(() => {
-    fetchRules();
+    fetchRules(); // Fetches data without exception_id on page load
   }, []);
+ 
+  // Handler for button click to fetch with exception_id
+  const handleButtonClick = () => {
+    if (!exceptionId) {
+      alert('Please enter a valid exception ID');
+      return;
+    }
+    fetchRules(exceptionId); // Fetches data using entered exception_id
+  };
+ 
+ 
+  const fetchData = async () => {
+ 
+    setError('');
+    try {
+      const response = await axios.get('http://localhost:5000/api/exception_stats');
+      // Convert the data to a string format suitable for textarea
+      const { total_records, records_by_exception_id } = response.data;
+   
+      // Format the data into a key-value pair string
+      let formattedData = `Total Records: ${total_records}\n\nRecords by Exception ID:\n`;
+      records_by_exception_id.forEach(record => {
+        formattedData += `Exception ID: ${record.exception_id}, Count: ${record.count}\n`;
+      });
+      //const formattedData = JSON.stringify(response.data, null, 2); // Pretty print with indentation
+       setSummaryData(formattedData);
+ 
+ 
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Error fetching data');
+      setSummaryData('');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white text-black min-h-screen">
@@ -83,7 +94,7 @@ const ExceptionRecords = () => {
 
           <button
             type="submit"
-            onClick={handleFilterClick}
+            onClick={handleButtonClick}
             className="bg-blue-600 hover:bg-blue-500 rounded-md w-32 h-10 flex items-center justify-center py-2 px-4"
           >
             <FaFilter className="mr-2" /> Filter
@@ -123,39 +134,45 @@ const ExceptionRecords = () => {
 
               {/* Table Body */}
               <tbody>
-                {data.map((item, index) => (
+              {data.length > 0 ? (
+                data.map((item, index) => (
                   <tr key={index}>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.id}
                     </td>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.exception_id}
                     </td>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.primary_key}
                     </td>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.logic}
                     </td>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.created_date}
                     </td>
-                    <td className="border border-gray p-2 min-w-[200px] whitespace-normal">
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.created_time}
                     </td>
                   </tr>
-                ))}
-              </tbody>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="p-4">No data available</td>
+                </tr>
+              )}
+            </tbody>
             </table>
           </div>
         </div>
 
         <div className="mt-5 p-5 mx-auto text-center">
           <textarea
-            name=""
-            id=""
             rows="10"
             className="border border-gray rounded-xl w-1/2 h-1/2 mx-auto"
+            value={summaryData}
+            readOnly
           ></textarea>
         </div>
         <div className="mx-auto flex space-x-5 my-5 justify-center">
@@ -172,6 +189,7 @@ const ExceptionRecords = () => {
           <button
             type="submit"
             className="text-white bg-blue-600 hover:bg-blue-500 rounded-md w-48 flex items-center justify-center py-2 px-4"
+            onClick={fetchData}
           >
             <FaCalculator className="mr-2" /> Calculate Summary
           </button>
