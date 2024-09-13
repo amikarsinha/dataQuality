@@ -38,11 +38,12 @@ class ExceptionRule(Base):
     
 class ExceptionResult(Base):
     __tablename__ = 'exception_result2'
-
+ 
     id = Column(Integer, primary_key=True, autoincrement=True)
     primary_key = Column(String(255), nullable=False)
-    created_date = Column(String(255), nullable=False)
+    created_date = Column(DateTime, nullable=False)
     created_time = Column(String(255), nullable=False)   # Change to Time if storing only time
+    valid_upto = Column(DateTime, nullable=False)
     exception_id = Column(Integer, nullable=False)
     Severity = Column(String(50), )
     department = Column(String(100), nullable=False)
@@ -243,57 +244,98 @@ def handle_exception(e):
 def execute_rule():
     try:
         data = request.get_json()
+        # app.logger.info(f'Received data: {data}')
         # print(data)
+        # print(data.get('exception_id'))
         # print("Hello")
         # Check if the input data is a list
-        if not isinstance(data, list):
-            return jsonify({"error": "Invalid input format, expected a list of JSON objects"}), 400
+        # if not isinstance(data, list):
+        #     return jsonify({"error": "Invalid input format, expected a list of JSON objects"}), 400
+        exception_id = data.get('exception_id')
+        logic = data.get('logic')
+        department = data.get('department')
+        Severity = data.get('Severity')
+        isactive = data.get('isactive')
+        print(data.get('created_date'))
+        # Extract and strip the date string
+ 
+        created_date_str = data.get('created_date', '').strip()
+ 
+    # Convert the cleaned string to a datetime object
+        try:
+            created_date = datetime.strptime(created_date_str, '%a, %d %b %Y %H:%M:%S')
+        except ValueError as e:
+            return jsonify({"error": f"Invalid date format: {e}"}), 400
+        created_date = created_date
+        print(created_date)
 
-        for item in data:
-            # Extract the relevant fields
-            exception_id = item.get('exception_id')
-            logic = item.get('logic')
-            department = item.get('department')
-            Severity = item.get('Severity')
-            isactive = item.get('isactive')
-            if not exception_id or not logic:
-                return jsonify({"error": "Both 'exception_id' and 'logic' are required in each item"}), 400
-
-            # Execute the SQL command
-            result_df = pd.read_sql_query(f'SELECT * FROM 250k_new_dataset WHERE {logic}', engine)
-            # print(result_df)
-            # Iterate through the result dataframe and store each result
-            for _, row in result_df.iterrows():
-                primary_key = str(row['PolicyId'])  # Assuming 'id' is the primary key of the `250k_new_dataset` table
-                created_date = str(datetime.now().date())
-                created_time = str(datetime.now().time())
-                print(len(created_time))
-                print(primary_key + "," + created_date  + ", " + created_time + ", " + created_time)
-
-                print("Adding exception result to db")
-                # Store the result in the ExceptionResult table
-                result_record = ExceptionResult(
-                    primary_key=primary_key,
-                    created_date=created_date,
-                    created_time=created_time,  # Store formatted time string
-                    exception_id=exception_id,
-                    department = department,
-                    Severity = Severity,
-                    isactive = isactive,
-                    logic=logic
+        # If Rules is Inactive
+        if(isactive == 0):
+            try:
+                session.query(ExceptionResult).filter(ExceptionResult.exception_id.in_([exception_id])).update(
+                    {ExceptionResult.isactive: False}, synchronize_session=False
                 )
-                
-                session.add(result_record)
-                print("Completed adding exception result to db")
+                # Commit the changes
+                session.commit()
+                print("Rows updated successfully.")
+                return jsonify({"message": "The record is in Inactive state and exceptions records are updated accordingly"}), 200
+            except Exception as e:
+                # Rollback in case of any error
+                # session.rollback()
+                print(f"An error occurred: {e}")
+            return jsonify({"message": "The record is in Inactive state and exceptions records are updated accordingly"}), 200
+       
+        # If Rule Already Exists and Just need valid_upto update
+        exception_rec = pd.read_sql_query(f'SELECT * FROM exception_result2',engine)
+        if( exception_rec['exception_id'].isin([exception_id]).any() ) :
+            update_exist = f""" UPDATE exception_result2
+                SET valid_upto = datetime.now().date()
+                WHERE exception_id = {exception_id};
+            """
+            return jsonify({"message": "Rule Executed"})      
+        # if not exception_id or not logic:
+        #     return jsonify({"error": "Both 'exception_id' and 'logic' are required in each item"}), 400
+        print("Hello")
+        result_df = pd.read_sql_query(logic, engine)
+        print(result_df)
+        s_no = 1
+        for _, row in result_df.iterrows():
+            primary_key = row['PolicyId']  # Assuming 'id' is the primary key of the `250k_new_dataset` table
+            # valid_upto = str(datetime.now().date().strftime('%Y-%m-%d'))
+            valid_upto = datetime.now().date()
+            # valid_upto = '2024-08-10 00:00:00'
+            # valid_upto = datetime.strptime(, '%a, %d %b %Y %H:%M:%S %Z')
+            created_time = str(datetime.now().time())
+            # print(len(created_time))
+            # print(primary_key + "," + created_date  + ", " + created_time + ", " + created_time)
+            s_no = s_no + 1
+            print(valid_upto)
+            print("Adding exception result to db")
+            # Store the result in the ExceptionResult table
+            result_record = ExceptionResult(
+                primary_key = primary_key,
+                created_date = created_date,
+                created_time = created_time,  # Store formatted time string
+                valid_upto = valid_upto,
+                exception_id = exception_id,
+                department = department,
+                Severity = Severity,
+                isactive = isactive,
+                logic = logic
+            )
+           
+            session.add(result_record)
+            # print(valid_upto)
+            # print(logic)
+            print("Completed adding exception result to db")
         print("Commiting exception result to db")
         session.commit()
         print("Commited exception result to db")
         return jsonify({"message": "Logic executed and results stored successfully!"}), 200
-
+ 
     except Exception as e:
-        session.rollback()
+        # session.rollback()
         return jsonify({"error": str(e)}), 400
-
 
 # Get all results for exception records
 # @app.route('/api/exception_results', methods=['GET'])
@@ -458,23 +500,80 @@ def create_records_vs_state_Graph():
     finally:
         Session.remove()
 
+@app.route('/count-rows-day', methods=['GET'])
+def count_rows_by_day():
+    # Get the current date and time
+    try:
+        now = datetime.utcnow()
+ 
+        # Query to get the minimum created_date from the table
+        min_date = session.query(func.min(ExceptionResult.created_date)).scalar()
+ 
+        # If there are no records, return an empty result
+        if not min_date:
+            return jsonify({"message": "No data available"}), 404
+ 
+        # Query to count rows grouped by day
+        # results = session.query(
+        #     func.date(ExceptionResult.created_date).label('date'),
+        #     func.count().label('count')
+        # ).filter(
+        #     ExceptionResult.created_date >= min_date,
+        #     ExceptionResult.created_date <= now
+        # ).group_by(
+        #     func.date(ExceptionResult.created_date)
+        # ).all()
+ 
+        df = pd.read_sql_query(f'SELECT * FROM  exception_result2',engine)
+        df['created_date'] = pd.to_datetime(df['created_date'])
+        min_from_date = df['created_date'].min()
+        # Generate a date range from the minimum 'From_date' to the current date
+        print(min_from_date)
+        date_range = pd.date_range(start=min_from_date, end= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0), freq='4D')
+       
+        print(datetime.utcnow())
+        new_data = {
+            'date': date_range,
+            'count': [((df['created_date'] <= date) & (df['valid_upto'] >= date)).sum() for date in date_range]
+        }
+ 
+        # Convert the new_data to a list of dictionaries and cast the counts to native Python int
+        data_list = [{'date': str(date.date()), 'count': int(count)} for date, count in zip(new_data['date'], new_data['count'])]
+        # Get today's date
+        today = pd.Timestamp(datetime.now().date())
+ 
+        # Count records where enddate is today
+        count_today = (df['valid_upto'] == today).sum()
+        result = {
+            'date': str(today.date()),  # Convert date to string
+            'count': int(count_today)  # Ensure count is an integer
+        }
+        data_list.append(result)
+        # data_list.reverse()
+        # Return the JSON response
+        return jsonify(data_list)
+    except Exception as e:
+        # Print the error to the console for debugging
+        print(f"Error occurred: {e}")
+        # session.rollback()
+        # Return a JSON response indicating an internal server error
+        return jsonify({'error': 'An internal server error occurred.'}), 500
 
+# @app.route('/api/line-chart-data', methods=['GET'])
+# def get_line_chart_data():
+#     # Query to count active programs by month and year
+#     query = session.query(
+#         func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
+#         func.count().label('active_count')
+#     ).filter(ExceptionResult.isactive == 0
+#     ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+#     ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
+#     ).all()
+#     print(query)
+#     # Convert query result to a list of dictionaries
+#     result = [{'date': month, 'active_count': active_count} for month, active_count in query]
 
-@app.route('/api/line-chart-data', methods=['GET'])
-def get_line_chart_data():
-    # Query to count active programs by month and year
-    query = session.query(
-        func.date_format(ExceptionResult.created_date, '%Y-%m').label('month'),
-        func.count().label('active_count')
-    ).filter(ExceptionResult.isactive == 0
-    ).group_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-    ).order_by(func.date_format(ExceptionResult.created_date, '%Y-%m')
-    ).all()
-    print(query)
-    # Convert query result to a list of dictionaries
-    result = [{'date': month, 'active_count': active_count} for month, active_count in query]
-
-    return jsonify(result)
+#     return jsonify(result)
 
 # # Get only Filtered Records
 # @app.route('/api/exception_results/<int:exception_id>',methods=['GET'])
@@ -510,18 +609,22 @@ def get_exception_results(exception_id=None):
             # Fetch all records
             print("Fetching all exception records")
             results = session.query(ExceptionResult).all()
+            # results = pd.read_sql_query(f'SELECT * FROM exception_result2',engine)
  
         if not results:
             return jsonify({"message": "No records found"}), 404
  
+        # result_list['created_time'] = pd.to_datetime(result_list['created_time']).dt.strftime('%Y-%m-%d')
         # Serialize the query results into a list of dictionaries
         result_list = [{
             "id": result.id,
             "primary_key": result.primary_key,
             "created_date": result.created_date,
             "created_time": result.created_time,
+            "valid_upto": result.valid_upto,
             "exception_id": result.exception_id,
-            "logic": result.logic
+            "logic": result.logic,
+            "isactive": result.isactive
         } for result in results]
  
         return jsonify(result_list), 200

@@ -5,7 +5,7 @@ import { FaChartBar, FaChartLine, FaChartPie } from "react-icons/fa";
 import fetchBarChartData from "../data/barChartData";
 import fetchBarChartDataForStatus from "../data/barChartDataStatus";
 import fetchHorizontalBarChartData from "../data/horizontalBarChartData";
-import fetchLineChartData from "../data/lineChartData";
+import lineChartData from "../data/lineChartData";
 import fetchPieChartData from "../data/pieChartData";
 import DqNavbar from '../components/DqNavbar';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -21,7 +21,6 @@ const Charts = () => {
   const [horizontalBarChartInstance, setHorizontalBarChartInstance] = useState(null);
   const [pieChatInstance, setPieCharInstance] = useState(null);
   const [barCharStatusInstance, setBarChartStatusInstance] = useState(null);
-  const [lineChartInstance, setLineChartInstance] = useState(null);
   useEffect(() => {
     const fetchDataAndRenderChart = async () => {
       try {
@@ -171,46 +170,10 @@ const Charts = () => {
         console.error("Error rendering the chart:", error);
       }
     };
-
-    const fetchDataRenderLineChart = async () => {
-      try {
-        // Fetch data using the async function
-        const lineChartData = await fetchLineChartData();
-
-        console.log(lineChartData)
-        // If there's an existing chart instance, destroy it before creating a new one
-        if (lineChartInstance) {
-          lineChartInstance.destroy();
-          setLineChartInstance(null); // Set to null after destroying
-        }
-
-        // Create a new chart instance
-        const newChartInstance = new Chart(lineRef.current, {
-          type: "line",
-          data: lineChartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                beginAtZero: true,
-              },
-              y: {
-                beginAtZero: true,
-              },
-            },
-          },
-        });
-        setLineChartInstance(newChartInstance);
-      } catch (error) {
-        console.error("Error rendering the chart:", error);
-      }
-    };
     fetchDataAndRenderChart();
     fetchDataAndRenderHorizontalChart();
     fetchDataAndRenderPieChart();
     fetchDataAndRenderStausChart();
-    fetchDataRenderLineChart();
     return () => {
       if (barChartInstance) {
         barChartInstance.destroy();
@@ -232,10 +195,6 @@ const Charts = () => {
         setPieCharInstance(null); // Set to null after destroying
       }
       // pieChart.destroy();
-      if(lineChartInstance){
-        lineChartInstance.destroy();
-        setLineChartInstance(null);
-      }
     };
   }, []);
 
@@ -263,32 +222,21 @@ const Charts = () => {
 
   {/* Second Row */}
   
-
-  
-  <div className="w-full md:w-1/2 p-2">
-    <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartLine className="mr-2" /> Active Records Over Time
-    </h3>
-    <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={lineRef} />
-    </div>
-  </div>
-
-  <div className="w-full md:w-1/2 p-2">
-    <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Status Chart
-    </h3>
-    <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={barRefStatus} />
-    </div>
-  </div>
-
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
       <FaChartPie className="mr-2" /> Department Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
       <canvas ref={pieRef} />
+    </div>
+  </div>
+
+  <div className="w-full md:w-1/2 p-2">
+    <h3 className="text-lg font-semibold mb-2 flex items-center">
+      <FaChartLine className="mr-2" /> Status Chart
+    </h3>
+    <div className="border border-gray-300 rounded-lg shadow-md p-4">
+      <canvas ref={barRefStatus} />
     </div>
   </div>
 </div>
