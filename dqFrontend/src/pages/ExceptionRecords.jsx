@@ -126,8 +126,11 @@ const ExceptionRecords = () => {
                   <th className="border border-gray hover:bg-blue-500 p-2">
                     Created Date
                   </th>
-                  <th className="border border-gray hover:bg-blue-500 p-2">
+                  {/* <th className="border border-gray hover:bg-blue-500 p-2">
                     Created Time
+                  </th> */}
+                  <th className="border border-gray hover:bg-blue-500 p-2">
+                    Valid Upto
                   </th>
                 </tr>
               </thead>
@@ -152,8 +155,11 @@ const ExceptionRecords = () => {
                     <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.created_date}
                     </td>
-                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                    {/* <td className="border border-black p-2 min-w-[200px] whitespace-normal">
                       {item.created_time}
+                    </td> */}
+                    <td className="border border-black p-2 min-w-[200px] whitespace-normal">
+                      {item.valid_upto}
                     </td>
                   </tr>
                 ))

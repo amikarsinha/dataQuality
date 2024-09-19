@@ -49,7 +49,7 @@ export default function Navbar() {
     { name: "Exception Rules", link: "/exceptionRules", icon: <FaCogs /> },
     { name: "Execute Rules", link: "/executeRules", icon: <FaClipboardList /> },
     { name: "Exception Records", link: "/exceptionRecords", icon: <FaTable /> },
-    { name: "Charts", link: "/charts", icon: <FaChartBar /> },
+    { name: "Data Quality Charts", link: "/charts", icon: <FaChartBar /> },
   ];
   useEffect(() => {
     onAuthStateChanged(firebaseAuth, (currentUser) => {

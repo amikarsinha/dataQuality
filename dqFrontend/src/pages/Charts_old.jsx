@@ -5,7 +5,7 @@ import { FaChartBar, FaChartLine, FaChartPie } from "react-icons/fa";
 import fetchBarChartData from "../data/barChartData";
 import fetchBarChartDataForStatus from "../data/barChartDataStatus";
 import fetchHorizontalBarChartData from "../data/horizontalBarChartData";
-import fetchLineChartData from "../data/lineChartData";
+import lineChartData from "../data/lineChartData";
 import fetchPieChartData from "../data/pieChartData";
 import DqNavbar from '../components/DqNavbar';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -21,7 +21,6 @@ const Charts = () => {
   const [horizontalBarChartInstance, setHorizontalBarChartInstance] = useState(null);
   const [pieChatInstance, setPieCharInstance] = useState(null);
   const [barCharStatusInstance, setBarChartStatusInstance] = useState(null);
-  const [lineChartInstance, setLineChartInstance] = useState(null);
   useEffect(() => {
     const fetchDataAndRenderChart = async () => {
       try {
@@ -171,46 +170,10 @@ const Charts = () => {
         console.error("Error rendering the chart:", error);
       }
     };
-
-    const fetchDataRenderLineChart = async () => {
-      try {
-        // Fetch data using the async function
-        const lineChartData = await fetchLineChartData();
-
-        console.log(lineChartData)
-        // If there's an existing chart instance, destroy it before creating a new one
-        if (lineChartInstance) {
-          lineChartInstance.destroy();
-          setLineChartInstance(null); // Set to null after destroying
-        }
-
-        // Create a new chart instance
-        const newChartInstance = new Chart(lineRef.current, {
-          type: "line",
-          data: lineChartData,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                beginAtZero: true,
-              },
-              y: {
-                beginAtZero: true,
-              },
-            },
-          },
-        });
-        setLineChartInstance(newChartInstance);
-      } catch (error) {
-        console.error("Error rendering the chart:", error);
-      }
-    };
     fetchDataAndRenderChart();
     fetchDataAndRenderHorizontalChart();
     fetchDataAndRenderPieChart();
     fetchDataAndRenderStausChart();
-    fetchDataRenderLineChart();
     return () => {
       if (barChartInstance) {
         barChartInstance.destroy();
@@ -232,42 +195,28 @@ const Charts = () => {
         setPieCharInstance(null); // Set to null after destroying
       }
       // pieChart.destroy();
-      if(lineChartInstance){
-        lineChartInstance.destroy();
-        setLineChartInstance(null);
-      }
     };
   }, []);
 
   return (
     <div>
       <DqNavbar />
-      <div className="flex flex-wrap justify-around p-8 m-8 mt-10">
+      <div className="flex flex-wrap justify-around p-8 m-8 mt-20">
   {/* First Row */}
-  <div className="w-full md:w-1/3 p-2">
+  <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
       <FaChartBar className="mr-2" /> Exceptions by ID Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={barRef} style={{ height: '200px' }} />
+      <canvas ref={barRef} />
     </div>
   </div>
-  
-  <div className="w-full md:w-1/3 p-2">
+  <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Status Chart
+      <FaChartBar className="mr-2" /> Severity Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={barRefStatus} style={{ height: '200px' }} />
-    </div>
-  </div>
-
-  <div className="w-full md:w-1/3 p-2">
-    <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartPie className="mr-2" /> Department Chart
-    </h3>
-    <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={pieRef} style={{ height: '200px' }} />
+      <canvas ref={horizontalBarRef} />
     </div>
   </div>
 
@@ -275,22 +224,21 @@ const Charts = () => {
   
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartLine className="mr-2" /> Active Records Over Time
+      <FaChartPie className="mr-2" /> Department Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={lineRef} style={{ height: '200px' }} />
+      <canvas ref={pieRef} />
     </div>
   </div>
 
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Severity Chart
+      <FaChartLine className="mr-2" /> Status Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={horizontalBarRef} style={{ height: '200px' }} />
+      <canvas ref={barRefStatus} />
     </div>
   </div>
-
 </div>
 
     </div>
