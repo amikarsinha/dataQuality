@@ -10,6 +10,7 @@
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "firebase": "^9.15.0",
+    "netflix-ui": "file:",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.7.1",

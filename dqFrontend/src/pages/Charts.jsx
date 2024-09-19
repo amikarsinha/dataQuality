@@ -242,55 +242,55 @@ const Charts = () => {
   return (
     <div>
       <DqNavbar />
-      <div className="flex flex-wrap justify-around p-8 m-8 mt-20">
+      <div className="flex flex-wrap justify-around p-8 m-8 mt-10">
   {/* First Row */}
-  <div className="w-full md:w-1/2 p-2">
+  <div className="w-full md:w-1/3 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
       <FaChartBar className="mr-2" /> Exceptions by ID Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={barRef} />
+      <canvas ref={barRef} style={{ height: '200px' }} />
     </div>
   </div>
-  <div className="w-full md:w-1/2 p-2">
+  
+  <div className="w-full md:w-1/3 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Severity Chart
+      <FaChartBar className="mr-2" /> Status Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={horizontalBarRef} />
+      <canvas ref={barRefStatus} style={{ height: '200px' }} />
+    </div>
+  </div>
+
+  <div className="w-full md:w-1/3 p-2">
+    <h3 className="text-lg font-semibold mb-2 flex items-center">
+      <FaChartPie className="mr-2" /> Department Chart
+    </h3>
+    <div className="border border-gray-300 rounded-lg shadow-md p-4">
+      <canvas ref={pieRef} style={{ height: '200px' }} />
     </div>
   </div>
 
   {/* Second Row */}
-  
-
   
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
       <FaChartLine className="mr-2" /> Active Records Over Time
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={lineRef} />
+      <canvas ref={lineRef} style={{ height: '200px' }} />
     </div>
   </div>
 
   <div className="w-full md:w-1/2 p-2">
     <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartBar className="mr-2" /> Status Chart
+      <FaChartBar className="mr-2" /> Severity Chart
     </h3>
     <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={barRefStatus} />
+      <canvas ref={horizontalBarRef} style={{ height: '200px' }} />
     </div>
   </div>
 
-  <div className="w-full md:w-1/2 p-2">
-    <h3 className="text-lg font-semibold mb-2 flex items-center">
-      <FaChartPie className="mr-2" /> Department Chart
-    </h3>
-    <div className="border border-gray-300 rounded-lg shadow-md p-4">
-      <canvas ref={pieRef} />
-    </div>
-  </div>
 </div>
 
     </div>

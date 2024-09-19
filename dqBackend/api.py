@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_cors import CORS
 import pandas as pd
 
@@ -288,10 +288,14 @@ def execute_rule():
         # If Rule Already Exists and Just need valid_upto update
         exception_rec = pd.read_sql_query(f'SELECT * FROM exception_result2',engine)
         if( exception_rec['exception_id'].isin([exception_id]).any() ) :
-            update_exist = f""" UPDATE exception_result2
-                SET valid_upto = datetime.now().date()
-                WHERE exception_id = {exception_id};
-            """
+            # update_exist = f""" UPDATE exception_result2
+            #     SET valid_upto = datetime.now().date()
+            #     WHERE exception_id = {exception_id};
+            # """
+            # print("Present")
+            session.query(ExceptionResult).filter(ExceptionResult.exception_id.in_([exception_id])).update({ExceptionResult.valid_upto: datetime.now().date()}, synchronize_session=False
+            )
+            session.commit()
             return jsonify({"message": "Rule Executed"})      
         # if not exception_id or not logic:
         #     return jsonify({"error": "Both 'exception_id' and 'logic' are required in each item"}), 400
@@ -529,12 +533,13 @@ def count_rows_by_day():
         min_from_date = df['created_date'].min()
         # Generate a date range from the minimum 'From_date' to the current date
         print(min_from_date)
-        date_range = pd.date_range(start=min_from_date, end= datetime.now().replace(hour=0, minute=0, second=0, microsecond=0), freq='4D')
+        yesterday = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
+        date_range = pd.date_range(start=min_from_date, end=yesterday, freq='4D')
        
         print(datetime.utcnow())
         new_data = {
             'date': date_range,
-            'count': [((df['created_date'] <= date) & (df['valid_upto'] >= date)).sum() for date in date_range]
+            'count': [(((df['created_date'] <= date) & (df['valid_upto'] >= date)) | df['isactive'] == True).sum() for date in date_range]
         }
  
         # Convert the new_data to a list of dictionaries and cast the counts to native Python int
@@ -543,7 +548,7 @@ def count_rows_by_day():
         today = pd.Timestamp(datetime.now().date())
  
         # Count records where enddate is today
-        count_today = (df['valid_upto'] == today).sum()
+        count_today = (((df['created_date'] <= today) & (df['valid_upto'] >= today)) | df['isactive'] == True).sum()
         result = {
             'date': str(today.date()),  # Convert date to string
             'count': int(count_today)  # Ensure count is an integer
